@@ -1,5 +1,15 @@
 README for vpntest.sh
 
+Testing availability of specific ports on one or more hosts is often needed.
+This can be achieved by a number of tools eg. telnet, nmap. 
+vpntest.sh uses netcat to do the scanning/testing to it is required to have nc installed (and to have execute permission on it)
+
+Goals of this script are:
+- batch processing of input
+- provide just enough data to tell if a port is available or not
+
+Dependency: nc
+
 Example input file content:
 $> cat testaddr
 127.0.0.1,22
