@@ -1,0 +1,17 @@
+README for vpntest.sh
+
+Example input file content:
+$> cat testaddr
+127.0.0.1,22
+192.168.1.1,3
+kiskutya
+192.167.1224.3,4
+
+Example run on previous file:
+$> ./vpntest.sh testaddr
+Connection to 127.0.0.1 on port 22 is OK!
+Connection to 192.168.1.1 on port 3 is NOK, message: nc: connect to 192.168.1.1 port 3 (tcp) timed out: Operation now in progress
+./vpntest.sh: Warning - Bad IP address found: kiskutya
+./vpntest.sh: Warning - Bad IP address found: 192.167.1224.3
+$> 
+
