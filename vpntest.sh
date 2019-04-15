@@ -28,6 +28,21 @@ function valid_ip()
     return $stat
 }
 
+function valid_port()
+{
+  # check if it is an unsigned integer
+  if ! [[ $1 =~ ^[0-9]+$ ]]
+  then
+    # echo "Invalid port number: $1"
+    return 1
+  fi
+
+  if [[ $1 -gt 65535 ]]
+  then
+    # echo "Port number $1 out of range."
+    return 2
+  fi
+}
 
 # check parameter is given or not
 if [ $# -ne 1 ];
@@ -52,7 +67,7 @@ do
 
 #  validate IPADDR with ipcalc
 #  if ipcalc -s -c $IPADDR ;  # does not work due to ipcalc version mismatch
-  if valid_ip $IPADDR ; 
+  if valid_ip $IPADDR && valid_port $PORT;
   then # IP address is valid, get to work. In case PORT is not a valid port, netcat will hiss anyways.
     MESSAGE=`nc -z -v -w $NCTO $IPADDR $PORT 2>&1`
     # using the return value of netcat:
@@ -66,7 +81,7 @@ do
    sleep $DBT # slow it down to avoid IPS blocks - we are scanning ports after all
 
   else # ip address invalid, skip
-    echo "$0: Warning - Bad IP address found: $IPADDR"
+    echo "  $0: Error in the following line: $IPADDR $PORT"
   fi
 
 done < $1
