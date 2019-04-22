@@ -20,16 +20,10 @@ function valid_ip()
 function valid_port()
 {
   # check if it is an unsigned integer
-  if ! [[ $1 =~ ^[0-9]+$ ]]
+  if ! ((($1&65535)==$1)) 2>/dev/null
   then
     # echo "Invalid port number: $1"
     return 1
-  fi
-
-  if [[ $1 -gt 65535 ]]
-  then
-    # echo "Port number $1 out of range."
-    return 2
   fi
 }
 
@@ -50,17 +44,19 @@ fi
 # echo "OK, file exists"
 
 while read line
-do 
-  IPADDR=`echo $line | cut -d"," -f1`
-  PORT=`echo $line | cut -d"," -f2`
+do
+# How about ignoring non-matching lines (value comma value) and handling them as comments?
+# Try it in console, the BASH_REMATCH array:
+# # [[ $line =~ ^([0-9.]+),([0-9]+) ]]; echo ${BASH_REMATCH[@]:1}
+  IPADDR=${line%,*}
+  PORT=${line#*,}
 
 #  validate IPADDR with ipcalc
 #  if ipcalc -s -c $IPADDR ;  # does not work due to ipcalc version mismatch
   if valid_ip $IPADDR && valid_port $PORT;
-  then # IP address is valid, get to work. In case PORT is not a valid port, netcat will hiss anyways.
-    MESSAGE=`nc -z -v -w $NCTO $IPADDR $PORT 2>&1`
-    # using the return value of netcat:
-    if [ $? -eq "0" ];
+  then # IP address is valid, get to work. In case PORT is not a valid port, netcat will hiss anyways
+    # using the return value of netcat with a bashism:
+    if MESSAGE=$(nc -z -v -w $NCTO $IPADDR $PORT 2>&1);
     then
       echo "Connection to $IPADDR on port $PORT is OK!"
     else
@@ -73,8 +69,7 @@ do
     echo "  $0: Error in the following line: $IPADDR $PORT"
   fi
 
-done < $1
+done < $1 # the only reason to open a subshell is the implicit declaration of locals like IPADDR etc.
 
 # So long, and thanX for all the fish
-exit 0
-
+exit $?
